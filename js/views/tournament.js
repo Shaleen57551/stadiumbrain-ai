@@ -1,5 +1,5 @@
 // Tournament Manager View Module - StadiumBrain AI
-import { triggerNotification, checkSchedulingConflicts } from '../app.js';
+import { triggerNotification, checkSchedulingConflicts, sanitizeHtml } from '../app.js';
 
 let appState = null;
 
@@ -175,20 +175,6 @@ function renderConflictsCard() {
   `).join('');
 
   lucide.createIcons();
-}
-
-function sanitizeHtml(str) {
-  if (typeof str !== 'string') return '';
-  return str.replace(/[&<>"']/g, function(match) {
-    const escapeMap = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;'
-    };
-    return escapeMap[match];
-  });
 }
 
 function handleAddMatch(e) {

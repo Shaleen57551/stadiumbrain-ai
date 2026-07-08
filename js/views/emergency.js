@@ -1,5 +1,5 @@
 // Emergency Command Center View Module - StadiumBrain AI
-import { triggerNotification, recalculateScores } from '../app.js';
+import { triggerNotification, recalculateScores, sanitizeHtml } from '../app.js';
 
 let appState = null;
 
@@ -192,20 +192,6 @@ function renderIncidentTimeline() {
   }).join('');
 
   lucide.createIcons();
-}
-
-function sanitizeHtml(str) {
-  if (typeof str !== 'string') return '';
-  return str.replace(/[&<>"']/g, function(match) {
-    const escapeMap = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;'
-    };
-    return escapeMap[match];
-  });
 }
 
 function handleLogIncident(e) {

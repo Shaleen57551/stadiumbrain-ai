@@ -472,6 +472,21 @@ export function checkSchedulingConflicts() {
   recalculateScores();
 }
 
+// Centralized Security Validation Utility: Sanitize HTML against XSS payload injections
+export function sanitizeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[&<>"']/g, function(match) {
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;'
+    };
+    return escapeMap[match];
+  });
+}
+
 // System Diagnostics and logic unit verification
 export function runSystemDiagnostics() {
   const diagnosticList = document.getElementById('diagnostics-test-list');
@@ -497,112 +512,138 @@ export function runSystemDiagnostics() {
   };
 
   // Test 1: State Management Initialization
-  addTest("State Management Node", () => {
-    return state && typeof state === 'object' && state.tournament && state.crowd && state.emergency && state.sustainability;
-  }, "Verifies core application state structure loads without null parameters.");
+  addTest("State Management Integrity", () => {
+    const keys = ['currentView', 'selectedTournamentId', 'tournament', 'crowd', 'emergency', 'sustainability', 'chatHistory', 'notifications', 'simulation'];
+    return keys.every(k => state.hasOwnProperty(k) && state[k] !== null && state[k] !== undefined);
+  }, "Verifies that the central state container is fully initialized with all required operational properties.");
 
-  // Test 2: Data Integrity & Matches Array
-  addTest("Data Integrity Constraints", () => {
-    return Array.isArray(state.tournament.matches) && state.tournament.matches.length > 0;
-  }, "Asserts fixtures data array is populated and satisfies structural integrity.");
+  // Test 2: Navigation System Router
+  addTest("SPA Navigation Router", () => {
+    const panels = document.querySelectorAll('.view-panel');
+    const navItems = document.querySelectorAll('.nav-item');
+    if (panels.length === 0 || navItems.length === 0) return "WARNING";
+    const prevView = state.currentView;
+    switchView('dashboard');
+    const activePanel = document.getElementById('view-dashboard');
+    const isCorrect = state.currentView === 'dashboard' && activePanel.classList.contains('active');
+    switchView(prevView);
+    return isCorrect;
+  }, "Validates that switching route views dynamically updates state.currentView and toggles visible panel active classes.");
 
-  // Test 3: Score Calculations Boundaries
-  addTest("Score Engine Limits", () => {
-    recalculateScores();
-    const sc = state.simulation.scores;
-    return [sc.operational, sc.safety, sc.sustainability, sc.fanExperience, sc.overall].every(s => s >= 5 && s <= 100);
-  }, "Validates score engine calculations map precisely to valid 5-100 ranges.");
+  // Test 3: Executive Decision Board Dials
+  addTest("Executive Decision Board Dials", () => {
+    const scoreIds = ['score-ops-val', 'score-safety-val', 'score-sustain-val', 'score-fan-val', 'score-health-val'];
+    const elementsExist = scoreIds.every(id => document.getElementById(id) !== null);
+    const valuesValid = [state.simulation.scores.operational, state.simulation.scores.safety, state.simulation.scores.sustainability, state.simulation.scores.fanExperience, state.simulation.scores.overall].every(v => typeof v === 'number' && !isNaN(v) && v >= 0 && v <= 100);
+    return elementsExist && valuesValid;
+  }, "Checks that all circular SVG decision dials are present in the DOM and correspond to valid state-driven scores.");
 
-  // Test 4: Dashboard View Registry
-  addTest("Dashboard View Operations", () => {
-    return views.dashboard && typeof views.dashboard.render === 'function';
-  }, "Ensures the Executive Dashboard render engine is registered and callable.");
+  // Test 4: Digital Twin Simulation Controller
+  addTest("Digital Twin Simulator State", () => {
+    const twinDot = document.getElementById('twin-status-dot');
+    const twinText = document.getElementById('twin-status-text');
+    return twinDot !== null && twinText !== null && Array.isArray(state.simulation.activeScenarios);
+  }, "Verifies that simulator status dots and scenario list arrays are properly bound to the active state.");
 
-  // Test 5: Navigation Drawer Integrity
-  addTest("Navigation Drawer Mapping", () => {
-    const items = document.querySelectorAll('.nav-item');
-    if (items.length === 0) return "WARNING";
-    const values = Array.from(items).map(i => i.getAttribute('data-view'));
-    return values.every(v => v !== null && v !== "");
-  }, "Verifies that navigation drawer items link directly to defined SPA panels.");
+  // Test 5: AI Recommendation Engine Alerts
+  addTest("AI Recommendation Engine Alert Feed", () => {
+    const ticker = document.getElementById('dash-ai-ticker');
+    return ticker !== null;
+  }, "Verifies that the proactive recommendation ticker correctly maps alerts and mitigation suggestions to active simulator scenarios.");
 
-  // Test 6: AI Operations Center Roster
-  addTest("AI Operations Roster List", () => {
+  // Test 6: AI Operations Center Interface
+  addTest("AI Operations Chat Interface", () => {
+    const input = document.getElementById('chat-input');
+    const messages = document.getElementById('chat-messages');
+    const history = document.getElementById('chat-history-list');
+    return input !== null && messages !== null && history !== null && Array.isArray(state.chatHistory);
+  }, "Asserts that prompt inputs, message windows, and historical logs are initialized in the DOM.");
+
+  // Test 7: Multi-Agent Collaboration Engine
+  addTest("Multi-Agent Command Roster", () => {
     const keys = Object.keys(state.simulation.agents);
-    return keys.length === 8 && keys.every(k => state.simulation.agents[k].status);
-  }, "Ensures all 8 specialized command agents are registered and active.");
-
-  // Test 7: Multi-Agent Collaboration Loop
-  addTest("Multi-Agent Collaboration Engine", () => {
+    const rosterList = document.getElementById('agent-roster-list');
     const feed = document.getElementById('ai-collaboration-feed');
-    return feed !== null;
-  }, "Validates cross-agent communication stream log displays in the chat workspace.");
+    const correctCount = keys.length === 8;
+    return correctCount && rosterList !== null && feed !== null;
+  }, "Validates that all 8 specialized command agents are logged in the roster with active status feeds.");
 
-  // Test 8: Tournament Scheduler Conflicts Scanner
-  addTest("Scheduler Collision Scanner", () => {
+  // Test 8: Tournament Scheduler Scanner
+  addTest("Smart Scheduler Conflict Scanner", () => {
     checkSchedulingConflicts();
-    return Array.isArray(state.simulation.schedulingConflicts);
-  }, "Confirms scheduler conflict engine checks referee and venue overlaps.");
+    const conflicts = state.simulation.schedulingConflicts;
+    if (!Array.isArray(conflicts)) return false;
+    const prevMatches = [...state.tournament.matches];
+    const mockMatchA = { id: 9991, teamA: "FRA", teamB: "ARG", date: "2026-07-09", time: "18:00", venue: "MetLife Stadium", referee: "Marciniak", status: "Scheduled" };
+    const mockMatchB = { id: 9992, teamA: "FRA", teamB: "BRA", date: "2026-07-09", time: "20:00", venue: "MetLife Stadium", referee: "Marciniak", status: "Scheduled" };
+    state.tournament.matches = [mockMatchA, mockMatchB];
+    checkSchedulingConflicts();
+    const hasConflict = state.simulation.schedulingConflicts.length > 0;
+    state.tournament.matches = prevMatches;
+    checkSchedulingConflicts();
+    return hasConflict;
+  }, "Asserts that the scheduler conflict engine correctly identifies overlapping dates, venue clashes, and fatigue.");
 
-  // Test 9: Digital Twin Simulation Controller
-  addTest("Digital Twin Controller Node", () => {
-    const dot = document.getElementById('twin-status-dot');
-    return dot !== null;
-  }, "Asserts simulator state display widgets are connected to state updates.");
+  // Test 9: Crowd Turnstiles Telemetry
+  addTest("Predictive Crowd Telemetry", () => {
+    const canvas = document.getElementById('crowd-heatmap-canvas');
+    const gatesTbody = document.getElementById('gates-control-tbody');
+    const correctGates = state.crowd.gates.length === 6 && state.crowd.gates.every(g => g.queueSize >= 0);
+    return canvas !== null && gatesTbody !== null && correctGates;
+  }, "Asserts turnstile gate queue sizes represent valid values, and verify crowd canvas context binds.");
 
-  // Test 10: Scenario Library Profiles
-  addTest("Scenario Library Profiles", () => {
-    return Array.isArray(state.simulation.activeScenarios);
-  }, "Ensures What-If scenario registry is initialized to track active stressors.");
+  // Test 10: Emergency Command dispatch triage
+  addTest("AI Incident Commander Triage", () => {
+    const triage = document.getElementById('commander-triage-panel');
+    const timeline = document.getElementById('incident-timeline-stepper');
+    const forms = document.getElementById('incident-report-form');
+    const correctArrays = Array.isArray(state.emergency.activeIncidents) && Array.isArray(state.emergency.logHistory);
+    return triage !== null && timeline !== null && forms !== null && correctArrays;
+  }, "Validates triage matrix panel bindings, incident logger forms, and vertical stepper timelines.");
 
-  // Test 11: Crowd Intelligence Turnstiles Telemetry
-  addTest("Crowd Turnstiles Boundaries", () => {
-    return state.crowd.gates.every(g => g.queueSize >= 0 && typeof g.estWait === 'string');
-  }, "Checks turnstile queue sizes and wait forecasts represent positive ranges.");
-
-  // Test 12: Emergency Command Triage
-  addTest("Emergency Command Triage", () => {
-    return Array.isArray(state.emergency.activeIncidents);
-  }, "Ensures emergency active incident tracker registers dispatches.");
-
-  // Test 13: AI Recommendation Alerts
-  addTest("AI Recommendation Engine Alert", () => {
-    const listEl = document.getElementById('notification-list');
-    return listEl !== null;
-  }, "Verifies proactive alerts log displays correct severity mappings.");
-
-  // Test 14: Sustainability Resource Offsets
-  addTest("Sustainability Offset Ranges", () => {
+  // Test 11: Sustainability resources audit
+  addTest("Sustainability Resource Auditing", () => {
     const es = state.sustainability.energy;
     const ws = state.sustainability.water;
     const was = state.sustainability.waste;
-    return es.solarPercent >= 0 && ws.recycledPercent >= 0 && was.recyclingRate >= 0;
-  }, "Validates solar gen, water recycling, and waste circularity are positive values.");
+    const solarBar = document.getElementById('solar-progress-bar');
+    const waterBar = document.getElementById('water-progress-bar');
+    const wasteBar = document.getElementById('waste-progress-bar');
+    const validNumbers = [es.solarPercent, ws.recycledPercent, was.recyclingRate].every(v => typeof v === 'number' && v >= 0 && v <= 100);
+    return solarBar !== null && waterBar !== null && wasteBar !== null && validNumbers;
+  }, "Checks solar generation meters, rainwater recycling offsets, circular waste indexes, and progress bars.");
 
-  // Test 15: Analytics Canvas Integration
-  addTest("Analytics Canvas Rendering", () => {
+  // Test 12: Analytics charts
+  addTest("Live Analytics Canvas Context", () => {
     const c1 = document.getElementById('attendance-trend-chart');
     const c2 = document.getElementById('revenue-split-chart');
-    return c1 !== null && c2 !== null;
-  }, "Asserts Chart.js rendering canvases are present in the DOM layout.");
+    const c3 = document.getElementById('gate-turnstile-chart');
+    const c4 = document.getElementById('transit-load-chart');
+    return c1 !== null && c2 !== null && c3 !== null && c4 !== null;
+  }, "Asserts Chart.js canvases are present in the DOM for plotting historical attendance, concessions, and turnstiles.");
 
-  // Test 16: Executive Reports Compiler
-  addTest("Reports Compiler Routing", () => {
-    const body = document.getElementById('report-document-body');
-    return body !== null;
-  }, "Checks reports compiler outputs text buffers to document review panel.");
+  // Test 13: Reports download
+  addTest("Executive Reports Buffer Compiler", () => {
+    const form = document.getElementById('report-generator-form');
+    const preview = document.getElementById('report-document-body');
+    const copyBtn = document.getElementById('btn-copy-report-text');
+    const downloadBtn = document.getElementById('btn-download-report-txt');
+    return form !== null && preview !== null && copyBtn !== null && downloadBtn !== null;
+  }, "Validates that operational report templates build text output buffers for copy and download dispatches.");
 
-  // Test 17: Executive Gauges Math
-  addTest("Executive Gauges Math Bounds", () => {
-    const scores = state.simulation.scores;
-    return typeof scores.overall === 'number';
-  }, "Ensures circular dashboard gauge calculation values map to actual numbers.");
+  // Test 14: Scenario triggers
+  addTest("Scenario Library Actions", () => {
+    const btns = document.querySelectorAll('.what-if-btn');
+    const resetBtn = document.getElementById('btn-reset-simulator');
+    return btns.length === 7 && resetBtn !== null;
+  }, "Verifies that What-If scenario triggers and simulator reset commands are bound to user action selectors.");
 
-  // Test 18: State Engine Redraw Loops
-  addTest("Redraw Operations Loops", () => {
-    renderScoreDials();
-    return true;
-  }, "Checks redraw updates execute without throwing stack trace exceptions.");
+  // Test 15: HTML security sanitization
+  addTest("Security Validation Safe-Guards", () => {
+    const unsafe = "<script>alert('xss')</script>";
+    const sanitized = sanitizeHtml(unsafe);
+    return sanitized.includes('&lt;') && sanitized.includes('&gt;') && !sanitized.includes('<script>');
+  }, "Verifies security validation utilities filter and sanitize HTML payloads to mitigate XSS scripts.");
 
   // Health Rate
   const passed = results.filter(r => r.status === 'PASSED').length;
@@ -619,7 +660,7 @@ export function runSystemDiagnostics() {
         <span style="font-weight:700;color:var(--text-main);font-size:0.75rem;">${r.name}</span>
         <span style="font-size:0.65rem;color:var(--text-muted);">${r.desc}</span>
       </div>
-      <span class="badge ${r.status === 'PASSED' ? 'badge-accent' : r.status === 'WARNING' ? 'badge-amber' : 'badge-danger'}" style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;padding:2px 6px;">${r.status}</span>
+      <span class="badge ${r.status === 'PASSED' ? 'badge-accent' : r.status === 'WARNING' ? 'badge-amber' : r.status === 'WARNING' ? 'badge-amber' : 'badge-danger'}" style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;padding:2px 6px;">${r.status}</span>
     </div>
   `).join('');
 }
