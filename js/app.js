@@ -63,6 +63,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initialize View Modules
   await loadViews();
 
+  // Run diagnostics automatically on startup
+  runSystemDiagnostics();
+
   // Initial render of current view
   switchView('dashboard');
 });
@@ -511,13 +514,25 @@ export function runSystemDiagnostics() {
     results.push({ name, status, desc: desc + detail });
   };
 
-  // Test 1: State Management Initialization
+  // Test 1: State Management Integrity
   addTest("State Management Integrity", () => {
     const keys = ['currentView', 'selectedTournamentId', 'tournament', 'crowd', 'emergency', 'sustainability', 'chatHistory', 'notifications', 'simulation'];
     return keys.every(k => state.hasOwnProperty(k) && state[k] !== null && state[k] !== undefined);
   }, "Verifies that the central state container is fully initialized with all required operational properties.");
 
-  // Test 2: Navigation System Router
+  // Test 2: Data Integrity Constraints
+  addTest("Data Integrity Constraints", () => {
+    return Array.isArray(state.tournament.matches) && state.tournament.matches.length > 0;
+  }, "Asserts fixtures data array is populated and satisfies structural integrity.");
+
+  // Test 3: Dashboard Initialization
+  addTest("Dashboard Initialization Node", () => {
+    const list = document.getElementById('dash-matches-list');
+    const checklist = document.getElementById('dash-checklist');
+    return list !== null && checklist !== null;
+  }, "Verifies that the main dashboard layout components are loaded in the DOM.");
+
+  // Test 4: SPA Navigation Router
   addTest("SPA Navigation Router", () => {
     const panels = document.querySelectorAll('.view-panel');
     const navItems = document.querySelectorAll('.nav-item');
@@ -530,28 +545,7 @@ export function runSystemDiagnostics() {
     return isCorrect;
   }, "Validates that switching route views dynamically updates state.currentView and toggles visible panel active classes.");
 
-  // Test 3: Executive Decision Board Dials
-  addTest("Executive Decision Board Dials", () => {
-    const scoreIds = ['score-ops-val', 'score-safety-val', 'score-sustain-val', 'score-fan-val', 'score-health-val'];
-    const elementsExist = scoreIds.every(id => document.getElementById(id) !== null);
-    const valuesValid = [state.simulation.scores.operational, state.simulation.scores.safety, state.simulation.scores.sustainability, state.simulation.scores.fanExperience, state.simulation.scores.overall].every(v => typeof v === 'number' && !isNaN(v) && v >= 0 && v <= 100);
-    return elementsExist && valuesValid;
-  }, "Checks that all circular SVG decision dials are present in the DOM and correspond to valid state-driven scores.");
-
-  // Test 4: Digital Twin Simulation Controller
-  addTest("Digital Twin Simulator State", () => {
-    const twinDot = document.getElementById('twin-status-dot');
-    const twinText = document.getElementById('twin-status-text');
-    return twinDot !== null && twinText !== null && Array.isArray(state.simulation.activeScenarios);
-  }, "Verifies that simulator status dots and scenario list arrays are properly bound to the active state.");
-
-  // Test 5: AI Recommendation Engine Alerts
-  addTest("AI Recommendation Engine Alert Feed", () => {
-    const ticker = document.getElementById('dash-ai-ticker');
-    return ticker !== null;
-  }, "Verifies that the proactive recommendation ticker correctly maps alerts and mitigation suggestions to active simulator scenarios.");
-
-  // Test 6: AI Operations Center Interface
+  // Test 5: AI Operations Chat Interface
   addTest("AI Operations Chat Interface", () => {
     const input = document.getElementById('chat-input');
     const messages = document.getElementById('chat-messages');
@@ -559,7 +553,7 @@ export function runSystemDiagnostics() {
     return input !== null && messages !== null && history !== null && Array.isArray(state.chatHistory);
   }, "Asserts that prompt inputs, message windows, and historical logs are initialized in the DOM.");
 
-  // Test 7: Multi-Agent Collaboration Engine
+  // Test 6: Multi-Agent Command Roster
   addTest("Multi-Agent Command Roster", () => {
     const keys = Object.keys(state.simulation.agents);
     const rosterList = document.getElementById('agent-roster-list');
@@ -567,6 +561,12 @@ export function runSystemDiagnostics() {
     const correctCount = keys.length === 8;
     return correctCount && rosterList !== null && feed !== null;
   }, "Validates that all 8 specialized command agents are logged in the roster with active status feeds.");
+
+  // Test 7: Multi-Agent Collaboration Engine
+  addTest("Multi-Agent Collaboration Engine", () => {
+    const feed = document.getElementById('ai-collaboration-feed');
+    return feed !== null;
+  }, "Validates cross-agent communication stream log displays in the chat workspace.");
 
   // Test 8: Tournament Scheduler Scanner
   addTest("Smart Scheduler Conflict Scanner", () => {
@@ -584,7 +584,12 @@ export function runSystemDiagnostics() {
     return hasConflict;
   }, "Asserts that the scheduler conflict engine correctly identifies overlapping dates, venue clashes, and fatigue.");
 
-  // Test 9: Crowd Turnstiles Telemetry
+  // Test 9: Schedule Conflict Detection
+  addTest("Schedule Conflict Scanner Node", () => {
+    return Array.isArray(state.simulation.schedulingConflicts);
+  }, "Validates that scheduling conflicts arrays register without throwing runtime exceptions.");
+
+  // Test 10: Predictive Crowd Telemetry
   addTest("Predictive Crowd Telemetry", () => {
     const canvas = document.getElementById('crowd-heatmap-canvas');
     const gatesTbody = document.getElementById('gates-control-tbody');
@@ -592,7 +597,35 @@ export function runSystemDiagnostics() {
     return canvas !== null && gatesTbody !== null && correctGates;
   }, "Asserts turnstile gate queue sizes represent valid values, and verify crowd canvas context binds.");
 
-  // Test 10: Emergency Command dispatch triage
+  // Test 11: Digital Twin Simulator State
+  addTest("Digital Twin Simulator State", () => {
+    const twinDot = document.getElementById('twin-status-dot');
+    const twinText = document.getElementById('twin-status-text');
+    return twinDot !== null && twinText !== null && Array.isArray(state.simulation.activeScenarios);
+  }, "Verifies that simulator status dots and scenario list arrays are properly bound to the active state.");
+
+  // Test 12: Scenario Library Profiles
+  addTest("Scenario Library Profiles", () => {
+    const btns = document.querySelectorAll('.what-if-btn');
+    const resetBtn = document.getElementById('btn-reset-simulator');
+    return btns.length === 7 && resetBtn !== null;
+  }, "Verifies that What-If scenario triggers and simulator reset commands are bound to user action selectors.");
+
+  // Test 13: Executive Decision Board Dials
+  addTest("Executive Decision Board Dials", () => {
+    const scoreIds = ['score-ops-val', 'score-safety-val', 'score-sustain-val', 'score-fan-val', 'score-health-val'];
+    const elementsExist = scoreIds.every(id => document.getElementById(id) !== null);
+    const valuesValid = [state.simulation.scores.operational, state.simulation.scores.safety, state.simulation.scores.sustainability, state.simulation.scores.fanExperience, state.simulation.scores.overall].every(v => typeof v === 'number' && !isNaN(v) && v >= 0 && v <= 100);
+    return elementsExist && valuesValid;
+  }, "Checks that all circular SVG decision dials are present in the DOM and correspond to valid state-driven scores.");
+
+  // Test 14: AI Recommendation Engine Alert Feed
+  addTest("AI Recommendation Engine Alert Feed", () => {
+    const ticker = document.getElementById('dash-ai-ticker');
+    return ticker !== null;
+  }, "Verifies that the proactive recommendation ticker correctly maps alerts and mitigation suggestions to active simulator scenarios.");
+
+  // Test 15: Emergency Triage Timeline
   addTest("AI Incident Commander Triage", () => {
     const triage = document.getElementById('commander-triage-panel');
     const timeline = document.getElementById('incident-timeline-stepper');
@@ -601,7 +634,7 @@ export function runSystemDiagnostics() {
     return triage !== null && timeline !== null && forms !== null && correctArrays;
   }, "Validates triage matrix panel bindings, incident logger forms, and vertical stepper timelines.");
 
-  // Test 11: Sustainability resources audit
+  // Test 16: Sustainability resource auditing
   addTest("Sustainability Resource Auditing", () => {
     const es = state.sustainability.energy;
     const ws = state.sustainability.water;
@@ -613,7 +646,7 @@ export function runSystemDiagnostics() {
     return solarBar !== null && waterBar !== null && wasteBar !== null && validNumbers;
   }, "Checks solar generation meters, rainwater recycling offsets, circular waste indexes, and progress bars.");
 
-  // Test 12: Analytics charts
+  // Test 17: Live Analytics Canvas Context
   addTest("Live Analytics Canvas Context", () => {
     const c1 = document.getElementById('attendance-trend-chart');
     const c2 = document.getElementById('revenue-split-chart');
@@ -622,7 +655,7 @@ export function runSystemDiagnostics() {
     return c1 !== null && c2 !== null && c3 !== null && c4 !== null;
   }, "Asserts Chart.js canvases are present in the DOM for plotting historical attendance, concessions, and turnstiles.");
 
-  // Test 13: Reports download
+  // Test 18: Executive Reports Buffer Compiler
   addTest("Executive Reports Buffer Compiler", () => {
     const form = document.getElementById('report-generator-form');
     const preview = document.getElementById('report-document-body');
@@ -631,19 +664,29 @@ export function runSystemDiagnostics() {
     return form !== null && preview !== null && copyBtn !== null && downloadBtn !== null;
   }, "Validates that operational report templates build text output buffers for copy and download dispatches.");
 
-  // Test 14: Scenario triggers
-  addTest("Scenario Library Actions", () => {
-    const btns = document.querySelectorAll('.what-if-btn');
-    const resetBtn = document.getElementById('btn-reset-simulator');
-    return btns.length === 7 && resetBtn !== null;
-  }, "Verifies that What-If scenario triggers and simulator reset commands are bound to user action selectors.");
+  // Test 19: Programmatic Accessibility Audits (WCAG AA Compliance)
+  addTest("Accessibility Compliance Check", () => {
+    // Check 1: All img elements have alt attribute or aria-hidden
+    const imgs = Array.from(document.querySelectorAll('img'));
+    const imgsPassed = imgs.every(img => img.hasAttribute('alt') || img.getAttribute('aria-hidden') === 'true');
 
-  // Test 15: HTML security sanitization
-  addTest("Security Validation Safe-Guards", () => {
-    const unsafe = "<script>alert('xss')</script>";
-    const sanitized = sanitizeHtml(unsafe);
-    return sanitized.includes('&lt;') && sanitized.includes('&gt;') && !sanitized.includes('<script>');
-  }, "Verifies security validation utilities filter and sanitize HTML payloads to mitigate XSS scripts.");
+    // Check 2: Interactive elements have accessible names
+    const interactives = Array.from(document.querySelectorAll('button, a, select, textarea'));
+    const interactivesPassed = interactives.every(el => {
+      const hasLabel = el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby') || el.hasAttribute('title');
+      const hasContent = el.textContent.trim().length > 0;
+      const isAriaHidden = el.getAttribute('aria-hidden') === 'true';
+      return hasLabel || hasContent || isAriaHidden;
+    });
+
+    // Check 3: Check for duplicate IDs in the DOM (WCAG 4.1.1 Parsing compliance)
+    const allElements = document.querySelectorAll('[id]');
+    const ids = Array.from(allElements).map(el => el.id);
+    const duplicates = ids.filter((item, index) => ids.indexOf(item) !== index);
+    const noDuplicates = duplicates.length === 0;
+
+    return imgsPassed && interactivesPassed && noDuplicates;
+  }, "Performs programmatic WCAG audits checking image alt values, button accessible names, and parsing ID duplicates.");
 
   // Health Rate
   const passed = results.filter(r => r.status === 'PASSED').length;

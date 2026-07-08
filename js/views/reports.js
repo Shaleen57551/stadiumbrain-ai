@@ -1,5 +1,5 @@
 // Executive Reports View Module - StadiumBrain AI
-import { triggerNotification } from '../app.js';
+import { triggerNotification, runSystemDiagnostics } from '../app.js';
 
 let appState = null;
 let currentReportText = '';
@@ -34,6 +34,13 @@ export function init(state) {
   const btnDownload = document.getElementById('btn-download-report-txt');
   if (btnDownload) {
     btnDownload.addEventListener('click', handleDownloadReport);
+  }
+
+  const btnRerun = document.getElementById('btn-rerun-diagnostics');
+  if (btnRerun) {
+    btnRerun.addEventListener('click', () => {
+      runSystemDiagnostics();
+    });
   }
 }
 

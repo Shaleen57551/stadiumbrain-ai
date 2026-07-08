@@ -1019,7 +1019,10 @@
               <div class="glass-card">
                 <div class="section-header">
                   <h3><i data-lucide="binary" aria-hidden="true"></i> System Diagnostics Suite</h3>
-                  <span class="badge badge-accent" id="diag-status">Tests Active</span>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="btn btn-outline btn-sm" id="btn-rerun-diagnostics" aria-label="Rerun system diagnostics suite">Rerun Tests</button>
+                    <span class="badge badge-accent" id="diag-status">Tests Active</span>
+                  </div>
                 </div>
                 <p class="section-desc" style="margin-bottom:10px;">Sanity tests checking tournament schedulers, crowd queues, and inputs boundary validation.</p>
                 <div id="diagnostics-test-list" class="checklist-item" style="display:flex;flex-direction:column;gap:8px;background:white;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:12px;" aria-live="polite">
