@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StadiumBrain AI - Tournament Operations Platform</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/views.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar" aria-label="Main Navigation">
+      <div class="sidebar-brand">
+        <div class="brand-logo" aria-hidden="true">
+          <i data-lucide="shield-alert" class="brand-icon"></i>
+        </div>
+        <div class="brand-text">
+          <h1>StadiumBrain</h1>
+          <span>AI Operations Platform</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="#" class="nav-item active" data-view="dashboard" aria-label="Go to Tournament Command Dashboard">
+              <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-view="ai-ops" aria-label="Go to AI Operations Command Center">
+              <i data-lucide="bot" aria-hidden="true"></i>
+              <span>AI Operations Center</span>
+              <span class="badge badge-accent">Live</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-view="tournament" aria-label="Go to Tournament and Match Fixture Manager">
+              <i data-lucide="calendar" aria-hidden="true"></i>
+              <span>Tournament Manager</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-view="crowd" aria-label="Go to Crowd Density and Queue Analytics">
+              <i data-lucide="users" aria-hidden="true"></i>
+              <span>Crowd Intelligence</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-view="emergency" aria-label="Go to Emergency Dispatch Command Center">
+              <i data-lucide="alert-triangle" aria-hidden="true"></i>
+              <span>Emergency Command</span>
+              <span id="emergency-alert-badge" class="badge badge-danger" style="display: none;">!</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-view="sustainability" aria-label="Go to Circular Sustainability Analytics">
+              <i data-lucide="leaf" aria-hidden="true"></i>
+              <span>Sustainability</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-view="analytics" aria-label="Go to Operational Revenue and Analytics KPI">
+              <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-view="reports" aria-label="Go to Executive Performance Reports">
+              <i data-lucide="file-text" aria-hidden="true"></i>
+              <span>Reports</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar" aria-hidden="true">OPS</div>
+          <div class="profile-info">
+            <span class="user-name">Director of Operations</span>
+            <span class="user-role">Super Admin</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="main-content-area" tabindex="-1">
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Sidebar" aria-expanded="false">
+            <i data-lucide="menu" aria-hidden="true"></i>
+          </button>
+          <div class="view-title-container">
+            <h2 id="current-view-title" tabindex="0">Dashboard</h2>
+            <span class="system-time" id="system-time" aria-live="polite">Loading...</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Active Mode Badges -->
+          <div class="active-modes" id="active-modes-indicators">
+            <span class="mode-badge active-mode-ops" aria-label="Operations Active"><i data-lucide="shield" aria-hidden="true"></i> Ops Active</span>
+          </div>
+
+          <!-- Tournament Selector -->
+          <div class="tournament-selector-wrapper">
+            <select id="tournament-select" class="tournament-select" aria-label="Select Tournament League">
+              <option value="world_cup_2026">FIFA World Cup 2026</option>
+              <option value="olympics_2028">Summer Olympics 2028</option>
+              <option value="champions_league">UEFA Champions League Finals</option>
+            </select>
+          </div>
+
+          <!-- Notification Center -->
+          <div class="notification-center">
+            <button class="icon-button notification-trigger" id="notification-trigger" aria-label="Toggle notifications dropdown menu" aria-haspopup="true" aria-expanded="false">
+              <i data-lucide="bell" aria-hidden="true"></i>
+              <span class="notification-count" id="notification-count">2</span>
+            </button>
+            <!-- Dropdown -->
+            <div class="notification-dropdown" id="notification-dropdown" aria-label="Notifications panel">
+              <div class="dropdown-header">
+                <h3>System Alerts</h3>
+                <button class="clear-alerts-btn" id="clear-alerts-btn" aria-label="Clear all system alerts">Clear All</button>
+              </div>
+              <ul class="dropdown-list" id="notification-list">
+                <!-- Loaded dynamically -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Connection Status -->
+          <div class="status-indicator online">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span class="status-text">Satellite Feed Connected</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- View Containers (Single Page Application) -->
+      <div class="content-body">
+        
+        <!-- 1. DASHBOARD VIEW -->
+        <div id="view-dashboard" class="view-panel active" aria-labelledby="current-view-title">
+          
+          <!-- Executive Decision Panel -->
+          <div class="decision-panel glass-card mb-4" aria-label="Executive Decision Board">
+            <div class="decision-panel-title">
+              <h3><i data-lucide="crown" aria-hidden="true"></i> Executive Decision Board</h3>
+              <span class="sub-label">Dynamic Real-time Operations Scores</span>
+            </div>
+            <div class="scores-grid">
+              
+              <div class="score-card" tabindex="0" aria-label="Operational Score circle chart">
+                <div class="score-circle-wrapper">
+                  <svg viewBox="0 0 36 36" class="circular-chart" aria-hidden="true">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="circle circle-blue" id="score-ops-circle" stroke-dasharray="94, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  </svg>
+                  <div class="score-percentage" id="score-ops-val">94</div>
+                </div>
+                <span class="score-label">Operational Score</span>
+              </div>
+
+              <div class="score-card" tabindex="0" aria-label="Safety Score circle chart">
+                <div class="score-circle-wrapper">
+                  <svg viewBox="0 0 36 36" class="circular-chart" aria-hidden="true">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="circle circle-red" id="score-safety-circle" stroke-dasharray="98, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  </svg>
+                  <div class="score-percentage" id="score-safety-val">98</div>
+                </div>
+                <span class="score-label">Safety Score</span>
+              </div>
+
+              <div class="score-card" tabindex="0" aria-label="Sustainability Score circle chart">
+                <div class="score-circle-wrapper">
+                  <svg viewBox="0 0 36 36" class="circular-chart" aria-hidden="true">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="circle circle-green" id="score-sustain-circle" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  </svg>
+                  <div class="score-percentage" id="score-sustain-val">85</div>
+                </div>
+                <span class="score-label">Sustainability Score</span>
+              </div>
+
+              <div class="score-card" tabindex="0" aria-label="Fan Experience Score circle chart">
+                <div class="score-circle-wrapper">
+                  <svg viewBox="0 0 36 36" class="circular-chart" aria-hidden="true">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="circle circle-purple" id="score-fan-circle" stroke-dasharray="89, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  </svg>
+                  <div class="score-percentage" id="score-fan-val">89</div>
+                </div>
+                <span class="score-label">Fan Experience Score</span>
+              </div>
+
+              <div class="score-card highlight" tabindex="0" aria-label="Overall Health Score circle chart">
+                <div class="score-circle-wrapper">
+                  <svg viewBox="0 0 36 36" class="circular-chart" aria-hidden="true">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="circle circle-gold" id="score-health-circle" stroke-dasharray="91, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  </svg>
+                  <div class="score-percentage" id="score-health-val">91</div>
+                </div>
+                <span class="score-label">Overall Health</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Overview Cards -->
+          <div class="dashboard-stats-grid">
+            <div class="stat-card glass-card" tabindex="0">
+              <div class="stat-icon-wrapper blue" aria-hidden="true">
+                <i data-lucide="users"></i>
+              </div>
+              <div class="stat-data">
+                <span class="stat-label">Stadium Attendance</span>
+                <h3 class="stat-value" id="dash-attendance-val">68,420 / 72,000</h3>
+                <span class="stat-trend trend-up"><i data-lucide="trending-up"></i> 95.0% Capacity</span>
+              </div>
+            </div>
+
+            <div class="stat-card glass-card" tabindex="0">
+              <div class="stat-icon-wrapper green" aria-hidden="true">
+                <i data-lucide="activity"></i>
+              </div>
+              <div class="stat-data">
+                <span class="stat-label">Operational Status</span>
+                <h3 class="stat-value" id="dash-operational-val">Normal</h3>
+                <span class="stat-trend trend-neutral">All gates operating</span>
+              </div>
+            </div>
+
+            <div class="stat-card glass-card" tabindex="0">
+              <div class="stat-icon-wrapper purple" aria-hidden="true">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="stat-data">
+                <span class="stat-label">Next Match Countdown</span>
+                <h3 class="stat-value" id="dash-countdown-val">01h 45m</h3>
+                <span class="stat-trend text-muted" id="dash-next-match-label">FRA vs ARG</span>
+              </div>
+            </div>
+
+            <div class="stat-card glass-card" tabindex="0">
+              <div class="stat-icon-wrapper amber" id="dash-weather-icon-container" aria-hidden="true">
+                <i data-lucide="sun"></i>
+              </div>
+              <div class="stat-data">
+                <span class="stat-label">Local Weather</span>
+                <h3 class="stat-value" id="dash-weather-val">24°C / Sunny</h3>
+                <span class="stat-trend text-muted" id="dash-humidity-val">Humidity 55% | Wind 12km/h</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Dashboard Layout -->
+          <div class="dashboard-layout-grid">
+            <!-- Left Column: Simulator & Actions -->
+            <div class="dash-column">
+              <!-- What-If & Digital Twin Scenario Library -->
+              <section class="dashboard-section glass-card border-accent bg-accent-glow" aria-label="Digital Twin Simulation Panel">
+                <div class="section-header">
+                  <h3 class="text-accent"><i data-lucide="cpu" aria-hidden="true"></i> AI Digital Twin Scenario Library</h3>
+                  <span class="badge badge-accent animate-pulse">One-Click Triage</span>
+                </div>
+                <p class="section-desc">Trigger simulated event stressors or weather crises to evaluate predicted operational effects and test mitigations.</p>
+                
+                <div class="what-if-controls-grid">
+                  <button class="what-if-btn" data-scenario="rain" aria-label="Load Heavy Rain scenario"><i data-lucide="cloud-rain" aria-hidden="true"></i> Heavy Rain</button>
+                  <button class="what-if-btn" data-scenario="surge" aria-label="Load Stadium Full Capacity scenario"><i data-lucide="users-round" aria-hidden="true"></i> Full Capacity</button>
+                  <button class="what-if-btn" data-scenario="medical" aria-label="Load Medical Emergency scenario"><i data-lucide="heart-handshake" aria-hidden="true"></i> Medical Emergency</button>
+                  <button class="what-if-btn" data-scenario="power" aria-label="Load Power Failure scenario"><i data-lucide="zap-off" aria-hidden="true"></i> Power Failure</button>
+                  <button class="what-if-btn" data-scenario="vip" aria-label="Load VIP Arrival scenario"><i data-lucide="award" aria-hidden="true"></i> VIP Arrival</button>
+                  <button class="what-if-btn" data-scenario="security" aria-label="Load Security Threat scenario"><i data-lucide="shield-alert" aria-hidden="true"></i> Security Threat</button>
+                  <button class="what-if-btn" data-scenario="transit_delay" aria-label="Load Transportation Delay scenario"><i data-lucide="bus" aria-hidden="true"></i> Transit Delay</button>
+                </div>
+
+                <div class="what-if-status-panel">
+                  <div class="twin-status-badge" aria-live="polite">
+                    <span class="pulse-dot" id="twin-status-dot" aria-hidden="true"></span>
+                    <span id="twin-status-text">Active Twin Status: Optimal Operations</span>
+                  </div>
+                  <button class="btn btn-outline btn-sm" id="btn-reset-simulator" aria-label="Reset simulation to default state">
+                    <i data-lucide="rotate-ccw" aria-hidden="true"></i> Reset Twin Simulation
+                  </button>
+                </div>
+              </section>
+
+              <!-- Today's Matches -->
+              <section class="dashboard-section glass-card" aria-label="Today's Matches schedule card">
+                <div class="section-header">
+                  <h3><i data-lucide="calendar-days" aria-hidden="true"></i> Today's Match Schedule</h3>
+                  <span class="header-action text-accent clickable" data-view-target="tournament" role="link" tabindex="0">View Tournament Manager</span>
+                </div>
+                <div class="match-list" id="dash-matches-list">
+                  <!-- Rendered dynamically -->
+                </div>
+              </section>
+
+              <!-- Quick Action Shortcuts -->
+              <section class="dashboard-section glass-card" aria-label="Quick action dispatcher buttons">
+                <div class="section-header">
+                  <h3><i data-lucide="zap" aria-hidden="true"></i> Quick Action Command Buttons</h3>
+                </div>
+                <div class="quick-actions-grid">
+                  <button class="action-btn" data-action="emergency-drill" aria-label="Initiate Emergency simulation drill"><i data-lucide="shield-alert" aria-hidden="true"></i> Initiate Simulation Drill</button>
+                  <button class="action-btn" data-action="broadcast-announcement" aria-label="Broadcast general announcment"><i data-lucide="volume-2" aria-hidden="true"></i> Trigger Announcement</button>
+                  <button class="action-btn" data-action="open-gates" aria-label="Override all gate locks to open status"><i data-lucide="door-open" aria-hidden="true"></i> Override All Gates Open</button>
+                  <button class="action-btn" data-action="reallocate-buses" aria-label="Dispatch additional bus shuttle supports"><i data-lucide="bus" aria-hidden="true"></i> Dispatch Shuttle Support</button>
+                </div>
+              </section>
+            </div>
+
+            <!-- Right Column: AI Ticker & Checklist -->
+            <div class="dash-column">
+              <!-- AI Recommendation Alert Panel -->
+              <section class="dashboard-section glass-card border-accent bg-accent-glow" aria-label="Proactive AI recommendations engine">
+                <div class="section-header">
+                  <h3 class="text-accent"><i data-lucide="sparkles" aria-hidden="true"></i> AI Recommendation Engine</h3>
+                  <span class="badge badge-accent animate-pulse">Proactive Feed</span>
+                </div>
+                <div class="ai-ticker-container" id="dash-ai-ticker">
+                  <!-- Loaded dynamically -->
+                </div>
+              </section>
+
+              <!-- Stadium Operational Status Checklist -->
+              <section class="dashboard-section glass-card" aria-label="Operational Checklist Card">
+                <div class="section-header">
+                  <h3><i data-lucide="clipboard-check" aria-hidden="true"></i> Pre-Event Operations Checklist</h3>
+                </div>
+                <div class="operational-checklist" id="dash-checklist">
+                  <div class="checklist-item">
+                    <input type="checkbox" id="chk-security" checked disabled aria-label="Security check complete">
+                    <label for="chk-security">Security Sweeps Complete (K9 & Perimeter)</label>
+                    <span class="chk-time" aria-label="Completed at 14:30">14:30</span>
+                  </div>
+                  <div class="checklist-item">
+                    <input type="checkbox" id="chk-broadcasting" checked disabled aria-label="Broadcasting feed check complete">
+                    <label for="chk-broadcasting">Broadcasting Feeds Connected</label>
+                    <span class="chk-time" aria-label="Completed at 15:15">15:15</span>
+                  </div>
+                  <div class="checklist-item">
+                    <input type="checkbox" id="chk-medical" checked disabled aria-label="Medical staff readiness check complete">
+                    <label for="chk-medical">Medical Stations Staffed (Zone A - F)</label>
+                    <span class="chk-time" aria-label="Completed at 15:45">15:45</span>
+                  </div>
+                  <div class="checklist-item">
+                    <input type="checkbox" id="chk-referees" checked aria-label="Referee briefing check complete">
+                    <label for="chk-referees">Match Officials briefing completed</label>
+                    <span class="chk-time" aria-label="Completed at 16:15">16:15</span>
+                  </div>
+                  <div class="checklist-item">
+                    <input type="checkbox" id="chk-concessions" aria-label="Concessions check toggle">
+                    <label for="chk-concessions">Concession POS terminals online</label>
+                    <span class="chk-time" id="concession-time">Pending</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. AI OPERATIONS CENTER VIEW -->
+        <div id="view-ai-ops" class="view-panel" aria-labelledby="current-view-title">
+          <div class="ai-ops-container">
+            <!-- Column 1 (Left): History and Prompt Chips -->
+            <div class="ai-ops-sidebar glass-card">
+              <div class="ai-ops-sidebar-header">
+                <h3>Prompt Assistant</h3>
+              </div>
+              <div class="prompt-chips-section">
+                <h4>Select Analysis Mode</h4>
+                <div class="prompt-chips" id="ops-mode-chips">
+                  <button class="chip" data-mode="Emergency" aria-label="Analyze Emergency Mode"><i data-lucide="alert-triangle" aria-hidden="true"></i> Emergency Mode</button>
+                  <button class="chip" data-mode="Crowd" aria-label="Analyze Crowd Mode"><i data-lucide="users" aria-hidden="true"></i> Crowd Mode</button>
+                  <button class="chip" data-mode="Schedule" aria-label="Analyze Schedule Mode"><i data-lucide="calendar" aria-hidden="true"></i> Schedule Mode</button>
+                  <button class="chip" data-mode="Finance" aria-label="Analyze Finance Mode"><i data-lucide="dollar-sign" aria-hidden="true"></i> Finance Mode</button>
+                  <button class="chip" data-mode="Media" aria-label="Analyze Media Mode"><i data-lucide="radio" aria-hidden="true"></i> Media Mode</button>
+                  <button class="chip" data-mode="Sustainability" aria-label="Analyze Sustainability Mode"><i data-lucide="leaf" aria-hidden="true"></i> Sustainability Mode</button>
+                  <button class="chip" data-mode="Accessibility" aria-label="Analyze Accessibility Mode"><i data-lucide="accessibility" aria-hidden="true"></i> Accessibility Mode</button>
+                </div>
+              </div>
+
+              <div class="chat-history-section" aria-label="Command History records">
+                <h4>Command History</h4>
+                <ul class="chat-history-list" id="chat-history-list">
+                  <!-- Rendered dynamically -->
+                </ul>
+              </div>
+            </div>
+
+            <!-- Column 2 (Center): Active Chat Interface -->
+            <div class="ai-ops-chat-main glass-card">
+              <div class="chat-header">
+                <div class="chat-title-info">
+                  <div class="chat-bot-avatar" aria-hidden="true">
+                    <i data-lucide="bot"></i>
+                  </div>
+                  <div>
+                    <h3>StadiumBrain AI</h3>
+                    <span id="chat-mode-indicator">Mode: Multi-Agent Hub</span>
+                  </div>
+                </div>
+                <div class="chat-actions">
+                  <button class="btn btn-outline btn-sm" id="clear-chat-btn" aria-label="Clear active conversation logs">
+                    <i data-lucide="trash-2" aria-hidden="true"></i> Clear Chat
+                  </button>
+                </div>
+              </div>
+
+              <!-- Message Window -->
+              <div class="chat-message-area" id="chat-messages" aria-live="polite">
+                <!-- Loaded dynamically -->
+              </div>
+
+              <!-- Input Area -->
+              <div class="chat-input-bar">
+                <div class="chat-input-wrapper">
+                  <textarea id="chat-input" placeholder="Enter command or select an analysis mode chip..." rows="1" aria-label="Input operational command query"></textarea>
+                  <button class="send-message-btn" id="send-chat-btn" aria-label="Send message query to StadiumBrain network">
+                    <i data-lucide="send" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div class="chat-disclaimer">
+                  StadiumBrain AI runs on secure local tournament operational logs.
+                </div>
+              </div>
+            </div>
+
+            <!-- Column 3 (Right): AI Command Center (Multi-Agent Roster) -->
+            <div class="ai-ops-roster-sidebar glass-card" aria-label="Multi-Agent team command list">
+              <div class="ai-ops-sidebar-header">
+                <h3>AI Command Roster</h3>
+              </div>
+              <div class="agent-roster-list" id="agent-roster-list">
+                <!-- Loaded dynamically -->
+              </div>
+              <div class="collaboration-log-section">
+                <h4>Agent Collaboration Stream</h4>
+                <div class="collaboration-log-feed" id="ai-collaboration-feed" aria-live="polite">
+                  <div class="collab-message system">Satellite link standby...</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 3. TOURNAMENT MANAGER VIEW -->
+        <div id="view-tournament" class="view-panel" aria-labelledby="current-view-title">
+          
+          <!-- Smart Schedule Conflicts Detector Warning Card -->
+          <div class="scheduler-warnings-card glass-card border-danger-glow mb-4" id="scheduler-conflict-card" style="display:none;" aria-live="assertive">
+            <div class="section-header text-danger">
+              <h3 class="text-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> AI Conflict Detector</h3>
+              <button class="btn btn-danger btn-sm" id="btn-auto-optimize-schedule" aria-label="Auto-optimize tournament matches to resolve scheduling conflicts">
+                <i data-lucide="sparkles" aria-hidden="true"></i> Auto-Optimize Schedule
+              </button>
+            </div>
+            <div class="conflict-warnings-list" id="scheduler-conflicts-list">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <div class="tournament-layout">
+            <!-- Left Side: Match Control Panel -->
+            <div class="tournament-control glass-card">
+              <div class="section-header">
+                <h3>Create / Edit Match Fixture</h3>
+              </div>
+              <form id="add-match-form" class="tournament-form" aria-label="Match fixtures creator form">
+                <div class="form-group">
+                  <label for="match-team-a">Team A</label>
+                  <select id="match-team-a" required aria-label="Select Team A"></select>
+                </div>
+                <div class="form-group">
+                  <label for="match-team-b">Team B</label>
+                  <select id="match-team-b" required aria-label="Select Team B"></select>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-6">
+                    <label for="match-date">Date</label>
+                    <input type="date" id="match-date" required aria-label="Select match date">
+                  </div>
+                  <div class="form-group col-6">
+                    <label for="match-time">Time</label>
+                    <input type="time" id="match-time" required aria-label="Select match kickoff time">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="match-venue">Venue Allocation</label>
+                  <select id="match-venue" required aria-label="Select stadium venue"></select>
+                </div>
+                <div class="form-group">
+                  <label for="match-referee">Referee Assignment</label>
+                  <select id="match-referee" required aria-label="Assign match referee"></select>
+                </div>
+                <div class="form-group">
+                  <label for="match-status">Match Status</label>
+                  <select id="match-status" aria-label="Select match state">
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Live">Live</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block"><i data-lucide="plus-circle" aria-hidden="true"></i> Add Match Fixture</button>
+              </form>
+            </div>
+
+            <!-- Right Side: Fixtures & Venue Status -->
+            <div class="tournament-main">
+              <!-- Fixtures Grid -->
+              <section class="glass-card mb-4">
+                <div class="section-header">
+                  <h3>Match Fixtures Calendar</h3>
+                  <div class="filter-controls">
+                    <select id="filter-venue-select" aria-label="Filter matches list by venue">
+                      <option value="all">All Venues</option>
+                      <!-- Populated dynamically -->
+                    </select>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table" id="fixtures-table">
+                    <thead>
+                      <tr>
+                        <th>Time & Date</th>
+                        <th>Matchup</th>
+                        <th>Venue</th>
+                        <th>Referee</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Rendered dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <!-- Team Directory -->
+              <section class="glass-card">
+                <div class="section-header">
+                  <h3>Registered Tournament Teams</h3>
+                </div>
+                <div class="teams-grid" id="teams-grid">
+                  <!-- Rendered dynamically -->
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. CROWD INTELLIGENCE VIEW -->
+        <div id="view-crowd" class="view-panel" aria-labelledby="current-view-title">
+          <div class="crowd-layout-grid">
+            <!-- Left Side: Live Heatmap -->
+            <div class="crowd-heatmap-section glass-card">
+              <div class="section-header">
+                <h3>Live Stadium Crowd Density Heatmap</h3>
+                <div class="heatmap-controls">
+                  <button class="btn btn-outline btn-sm" id="btn-toggle-heatmap" aria-label="Manually regenerate crowd flow density points">
+                    <i data-lucide="refresh-cw" aria-hidden="true"></i> Regenerate Density
+                  </button>
+                </div>
+              </div>
+              <div class="heatmap-canvas-wrapper" aria-label="Visual elliptical stadium heat map rendering">
+                <canvas id="crowd-heatmap-canvas" width="600" height="400"></canvas>
+                <!-- Gate labels overlaid on map -->
+                <div class="gate-overlay gate-a" style="top: 10%; left: 50%;">Gate A</div>
+                <div class="gate-overlay gate-b" style="top: 50%; left: 90%;">Gate B</div>
+                <div class="gate-overlay gate-c" style="top: 85%; left: 70%;">Gate C</div>
+                <div class="gate-overlay gate-d" style="top: 85%; left: 30%;">Gate D</div>
+                <div class="gate-overlay gate-e" style="top: 50%; left: 10%;">Gate E</div>
+                <div class="gate-overlay gate-f" style="top: 10%; left: 20%;">Gate F</div>
+              </div>
+              <div class="heatmap-legend">
+                <span>Density scale:</span>
+                <span class="legend-scale" aria-hidden="true">
+                  <span class="scale-color low"></span> Low
+                  <span class="scale-color mod"></span> Mod
+                  <span class="scale-color high"></span> Congested
+                </span>
+              </div>
+            </div>
+
+            <!-- Right Side: Gate, Parking & Queue Metrics -->
+            <div class="crowd-metrics-section">
+              <!-- Congestion Alerts -->
+              <section class="glass-card mb-4 border-danger-glow" id="congestion-alerts-box" aria-live="assertive">
+                <div class="section-header text-danger">
+                  <h3 class="text-danger"><i data-lucide="alert-circle" aria-hidden="true"></i> Gate Congestion & Flow Alerts</h3>
+                </div>
+                <div class="alerts-list" id="crowd-alerts-list">
+                  <!-- Rendered dynamically -->
+                </div>
+              </section>
+
+              <!-- Turnstile Operations with Predictive Crowd Intelligence -->
+              <section class="glass-card mb-4">
+                <div class="section-header">
+                  <h3>Turnstile Gates Operations</h3>
+                  <button class="btn btn-accent btn-sm" id="btn-run-crowd-redistribution" aria-label="Trigger AI Turnstile crowd flow redistribution">
+                    <i data-lucide="sparkles" aria-hidden="true"></i> AI Crowd Redistribution
+                  </button>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table align-middle">
+                    <thead>
+                      <tr>
+                        <th>Gate Name</th>
+                        <th>Queue Size</th>
+                        <th>Est. Wait</th>
+                        <th>Predicted (30m)</th>
+                        <th>Risk Level</th>
+                        <th>Status</th>
+                        <th>Controls</th>
+                      </tr>
+                    </thead>
+                    <tbody id="gates-control-tbody">
+                      <!-- Rendered dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <!-- Parking Lot Utilization -->
+              <section class="glass-card">
+                <div class="section-header">
+                  <h3>Transit Hubs & Parking Lots</h3>
+                </div>
+                <div class="parking-status-list" id="parking-list">
+                  <!-- Rendered dynamically -->
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. EMERGENCY COMMAND VIEW -->
+        <div id="view-emergency" class="view-panel" aria-labelledby="current-view-title">
+          <!-- Critical Emergency Banner -->
+          <div class="emergency-alert-banner" id="active-emergency-banner" style="display: none;" aria-live="assertive">
+            <div class="banner-content">
+              <i data-lucide="shield-alert" class="animate-pulse" aria-hidden="true"></i>
+              <div>
+                <h4>ACTIVE EMERGENCY SIMULATION DRILL ACTIVE</h4>
+                <p>All emergency dispatch coordinates and routes are simulated for operational evaluation.</p>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-white" id="btn-deactivate-drill" aria-label="Deactivate active emergency simulation drill">Deactivate Drill</button>
+          </div>
+
+          <div class="emergency-layout-grid">
+            <!-- Column 1: Response & Dispatches -->
+            <div class="emergency-column">
+              
+              <!-- AI Incident Commander Triage Panel -->
+              <section class="glass-card mb-4 border-accent bg-accent-glow" aria-label="AI incident triage recommendations panel">
+                <div class="section-header text-accent">
+                  <h3><i data-lucide="bot" aria-hidden="true"></i> AI Incident Commander</h3>
+                  <span class="badge badge-accent">Auto-Triage Matrix</span>
+                </div>
+                <p class="section-desc">Real-time emergency prioritizing, safety triage, and response dispatch recommendations.</p>
+                <div class="commander-triage-panel" id="commander-triage-panel" aria-live="polite">
+                  <!-- Loaded dynamically -->
+                </div>
+              </section>
+
+              <!-- Dispatch & Controls -->
+              <section class="glass-card mb-4 border-danger" aria-label="Incident manual dispatch buttons">
+                <div class="section-header text-danger">
+                  <h3><i data-lucide="alert-triangle" aria-hidden="true"></i> Emergency Dispatch Controls</h3>
+                </div>
+                <p class="section-desc">Instantly alert medical, police, fire, or crowd management units.</p>
+                <div class="emergency-dispatch-buttons">
+                  <button class="dispatch-btn medical" data-unit="Medical" aria-label="Dispatch medical response unit">
+                    <i data-lucide="heart-pulse" aria-hidden="true"></i> Dispatch Medical Unit
+                  </button>
+                  <button class="dispatch-btn security" data-unit="Security" aria-label="Dispatch security patrol team">
+                    <i data-lucide="shield" aria-hidden="true"></i> Dispatch Security Squad
+                  </button>
+                  <button class="dispatch-btn fire" data-unit="Fire" aria-label="Dispatch fire safety squad">
+                    <i data-lucide="flame" aria-hidden="true"></i> Dispatch Fire Response
+                  </button>
+                  <button class="dispatch-btn evacuation" data-unit="Evac" aria-label="Trigger zone evacuation protocol">
+                    <i data-lucide="door-open" aria-hidden="true"></i> Trigger Zone Evac
+                  </button>
+                </div>
+              </section>
+
+              <!-- Evacuation Recommendations & Paths -->
+              <section class="glass-card" aria-label="Evacuation routing assembly zones list">
+                <div class="section-header">
+                  <h3>Evacuation Routing & Safety Zones</h3>
+                </div>
+                <div class="evac-info-panel">
+                  <div class="evac-zone-card">
+                    <div class="zone-name">North Stand (Zones A-C)</div>
+                    <div class="zone-route">Exit via Gate A & F. Evacuation Assembly: Parking Lot North.</div>
+                    <span class="badge badge-accent">Preferred Route Clear</span>
+                  </div>
+                  <div class="evac-zone-card">
+                    <div class="zone-name">South Stand (Zones D-F)</div>
+                    <div class="zone-route">Exit via Gate C & D. Evacuation Assembly: Transit Plaza.</div>
+                    <span class="badge badge-danger">Gate E Congestion Block</span>
+                  </div>
+                </div>
+                <div class="evac-canvas-container" aria-label="Visual blueprint evacuation lines">
+                  <canvas id="evac-route-canvas" width="400" height="200"></canvas>
+                </div>
+              </section>
+            </div>
+
+            <!-- Column 2: Incident Reporting & Timeline -->
+            <div class="emergency-column">
+              <!-- Report Incident Form -->
+              <section class="glass-card mb-4">
+                <div class="section-header">
+                  <h3>Report Operations Incident</h3>
+                </div>
+                <form id="incident-report-form" class="tournament-form" aria-label="Operational incident logging form">
+                  <div class="form-group">
+                    <label for="inc-type">Incident Type</label>
+                    <select id="inc-type" required aria-label="Select incident class">
+                      <option value="Medical">Medical Emergency</option>
+                      <option value="Security">Security / Brawl</option>
+                      <option value="Crowd">Gate Crowding</option>
+                      <option value="Infrastructure">Power / Utility Outage</option>
+                      <option value="Weather">Severe Weather Alert</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="inc-location">Location / Zone</label>
+                    <input type="text" id="inc-location" placeholder="e.g. Gate E, Zone B, Row 12" required aria-label="Enter exact coordinates location">
+                  </div>
+                  <div class="form-group">
+                    <label for="inc-severity">Severity Level</label>
+                    <select id="inc-severity" aria-label="Select incident severity triage">
+                      <option value="Low">Low - Operations Monitor</option>
+                      <option value="Medium">Medium - Response Dispatch</option>
+                      <option value="High">High - Critical Command</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="inc-details">Description</label>
+                    <textarea id="inc-details" rows="3" placeholder="Provide event details..." required aria-label="Provide details description"></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-danger btn-block"><i data-lucide="plus-circle" aria-hidden="true"></i> Log Active Incident</button>
+                </form>
+              </section>
+
+              <!-- Incident Chronological Timeline -->
+              <section class="glass-card" aria-label="Live chronological incident logs timeline">
+                <div class="section-header">
+                  <h3><i data-lucide="history" aria-hidden="true"></i> Live Incident Timeline</h3>
+                </div>
+                <div class="timeline-stepper" id="incident-timeline-stepper" aria-live="polite">
+                  <!-- Stepper nodes loaded dynamically -->
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. SUSTAINABILITY DASHBOARD VIEW -->
+        <div id="view-sustainability" class="view-panel" aria-labelledby="current-view-title">
+          <!-- Main Grid -->
+          <div class="sustainability-grid">
+            <!-- Resource Cards -->
+            <div class="sustainability-card glass-card" tabindex="0">
+              <div class="card-header">
+                <h3><i data-lucide="zap" class="text-accent" aria-hidden="true"></i> Energy Grid Analytics</h3>
+                <span class="badge badge-accent">Renewable Active</span>
+              </div>
+              <div class="gauge-section">
+                <!-- Circular progress SVG -->
+                <div class="circular-progress-wrapper">
+                  <svg viewBox="0 0 100 100" class="circular-progress" aria-hidden="true">
+                    <circle cx="50" cy="50" r="40" class="progress-bg"></circle>
+                    <circle cx="50" cy="50" r="40" class="progress-bar" id="solar-progress-bar" stroke-dasharray="251.2" stroke-dashoffset="62.8"></circle>
+                  </svg>
+                  <div class="progress-text">
+                    <span class="progress-val" id="solar-percent-val">75%</span>
+                    <span class="progress-label">Solar Powered</span>
+                  </div>
+                </div>
+              </div>
+              <div class="resource-breakdown">
+                <div class="resource-row">
+                  <span>Solar Generation</span>
+                  <span class="resource-val-text font-mono" id="solar-generation-val">340 kWh</span>
+                </div>
+                <div class="resource-row">
+                  <span>Grid Power Intake</span>
+                  <span class="resource-val-text font-mono" id="grid-intake-val">113 kWh</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sustainability-card glass-card" tabindex="0">
+              <div class="card-header">
+                <h3><i data-lucide="droplet" class="text-blue" aria-hidden="true"></i> Water & Rainwater Usage</h3>
+                <span class="badge badge-blue">Recycled Net</span>
+              </div>
+              <div class="gauge-section">
+                <div class="circular-progress-wrapper">
+                  <svg viewBox="0 0 100 100" class="circular-progress" aria-hidden="true">
+                    <circle cx="50" cy="50" r="40" class="progress-bg"></circle>
+                    <circle cx="50" cy="50" r="40" class="progress-bar progress-blue" id="water-progress-bar" stroke-dasharray="251.2" stroke-dashoffset="100.5"></circle>
+                  </svg>
+                  <div class="progress-text">
+                    <span class="progress-val" id="water-percent-val">60%</span>
+                    <span class="progress-label">Recycled Water</span>
+                  </div>
+                </div>
+              </div>
+              <div class="resource-breakdown">
+                <div class="resource-row">
+                  <span>Rainwater Harvested</span>
+                  <span class="resource-val-text font-mono" id="rainwater-val">45,000 L</span>
+                </div>
+                <div class="resource-row">
+                  <span>Potable Water Drawn</span>
+                  <span class="resource-val-text font-mono" id="potable-val">30,000 L</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sustainability-card glass-card" tabindex="0">
+              <div class="card-header">
+                <h3><i data-lucide="trash-2" class="text-amber" aria-hidden="true"></i> Circular Waste Management</h3>
+                <span class="badge badge-amber">Goal: Zero Waste</span>
+              </div>
+              <div class="gauge-section">
+                <div class="circular-progress-wrapper">
+                  <svg viewBox="0 0 100 100" class="circular-progress" aria-hidden="true">
+                    <circle cx="50" cy="50" r="40" class="progress-bg"></circle>
+                    <circle cx="50" cy="50" r="40" class="progress-bar progress-amber" id="waste-progress-bar" stroke-dasharray="251.2" stroke-dashoffset="45.2"></circle>
+                  </svg>
+                  <div class="progress-text">
+                    <span class="progress-val" id="waste-percent-val">82%</span>
+                    <span class="progress-label">Recycling Rate</span>
+                  </div>
+                </div>
+              </div>
+              <div class="resource-breakdown">
+                <div class="resource-row">
+                  <span>Compost & Recycled</span>
+                  <span class="resource-val-text font-mono" id="recycled-waste-val">8.2 tons</span>
+                </div>
+                <div class="resource-row">
+                  <span>Landfill Waste</span>
+                  <span class="resource-val-text font-mono" id="landfill-waste-val">1.8 tons</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Carbon Offset and EV Grid -->
+          <div class="sustainability-lower-grid">
+            <section class="glass-card">
+              <div class="section-header">
+                <h3><i data-lucide="leaf" aria-hidden="true"></i> Carbon Footprint Tracking & Offsets</h3>
+              </div>
+              <div class="carbon-metrics-container">
+                <div class="carbon-meter" tabindex="0">
+                  <span class="carbon-label">Event Carbon Footprint</span>
+                  <h3 id="carbon-footprint-val">42.5 tCO₂e</h3>
+                  <span class="text-muted">Calculated using ticketing, travel distance averages, and stadium energy intake.</span>
+                </div>
+                <div class="offset-programs">
+                  <h4>Active Offset Programs</h4>
+                  <div class="offset-card">
+                    <div class="offset-name">Regional Reforestation Offset</div>
+                    <div class="offset-amount">-25.0 tCO₂e</div>
+                  </div>
+                  <div class="offset-card">
+                    <div class="offset-name">Stadium Solar Grid Offset</div>
+                    <div class="offset-amount">-18.5 tCO₂e</div>
+                  </div>
+                  <div class="offset-card net-zero">
+                    <div class="offset-name font-semibold">Net Event Carbon Balance</div>
+                    <div class="offset-amount font-semibold text-emerald-green" id="net-carbon-val">-1.0 tCO₂e (Net Negative)</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="glass-card">
+              <div class="section-header">
+                <h3><i data-lucide="plug" aria-hidden="true"></i> EV Charging Stations status</h3>
+              </div>
+              <div class="ev-grid" id="ev-charger-list">
+                <!-- Loaded dynamically -->
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- 7. ANALYTICS VIEW -->
+        <div id="view-analytics" class="view-panel" aria-labelledby="current-view-title">
+          <div class="analytics-filter-bar glass-card mb-4">
+            <span class="filter-label"><i data-lucide="sliders-horizontal" aria-hidden="true"></i> Filters:</span>
+            <div class="analytics-filter-options">
+              <button class="btn btn-sm btn-accent" data-filter="7days" aria-label="Show charts for past 7 days">Past 7 Days</button>
+              <button class="btn btn-sm btn-outline" data-filter="today" aria-label="Show charts for today only">Match Day Only</button>
+              <button class="btn btn-sm btn-outline" data-filter="alltime" aria-label="Show charts for whole season">Whole Season</button>
+            </div>
+          </div>
+
+          <div class="analytics-charts-grid">
+            <div class="chart-card glass-card">
+              <div class="chart-header">
+                <h3>Attendance Analytics Trend</h3>
+              </div>
+              <div class="chart-canvas-container" aria-label="Attendance graph chart canvas">
+                <canvas id="attendance-trend-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card glass-card">
+              <div class="chart-header">
+                <h3>Revenue Split (Ticket vs Concession)</h3>
+              </div>
+              <div class="chart-canvas-container" aria-label="Revenue doughnut chart canvas">
+                <canvas id="revenue-split-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card glass-card">
+              <div class="chart-header">
+                <h3>Gate Turnstile Hourly Peak Utilization</h3>
+              </div>
+              <div class="chart-canvas-container" aria-label="Turnstile bar chart canvas">
+                <canvas id="gate-turnstile-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card glass-card">
+              <div class="chart-header">
+                <h3>Transit Hub Capacity Load</h3>
+              </div>
+              <div class="chart-canvas-container" aria-label="Transit load graph canvas">
+                <canvas id="transit-load-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. REPORTS VIEW -->
+        <div id="view-reports" class="view-panel" aria-labelledby="current-view-title">
+          <div class="reports-layout">
+            <!-- Left Side: Configurator & Diagnostics Suite -->
+            <div class="reports-config">
+              <div class="glass-card mb-4">
+                <div class="section-header">
+                  <h3>Generate Operational Report</h3>
+                </div>
+                <form id="report-generator-form" class="tournament-form" aria-label="Reports configurations selector">
+                  <div class="form-group">
+                    <label for="rep-template">Report Template</label>
+                    <select id="rep-template" aria-label="Select report template structure">
+                      <option value="executive">Executive Summary Report</option>
+                      <option value="sustainability">Sustainability Audit Report</option>
+                      <option value="crowd">Crowd Dynamics & Queue Analysis</option>
+                      <option value="emergency">Emergency Response & Drill Assessment</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="rep-period">Time Period</label>
+                    <select id="rep-period" aria-label="Select report time intervals">
+                      <option value="current">Current Event Matchday</option>
+                      <option value="week">Past Week Events</option>
+                      <option value="month">Full Month Tournament Summary</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Include Sections</label>
+                    <div class="checkbox-group">
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="rep-sec-kpis" checked aria-label="Include operational metrics KPI"> Key KPIs
+                      </label>
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="rep-sec-incidents" checked aria-label="Include active incident logs"> Incidents Log
+                      </label>
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="rep-sec-carbon" checked aria-label="Include carbon offsets and footprints"> Carbon Footprint
+                      </label>
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="rep-sec-ai-recs" checked aria-label="Include dynamic AI recommendation alerts logs"> AI Interventions
+                      </label>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block"><i data-lucide="file-chart-column" aria-hidden="true"></i> Generate Report</button>
+                </form>
+              </div>
+
+              <!-- System Diagnostics & Logic Testing Suite card -->
+              <div class="glass-card">
+                <div class="section-header">
+                  <h3><i data-lucide="binary" aria-hidden="true"></i> System Diagnostics Suite</h3>
+                  <span class="badge badge-accent" id="diag-status">Tests Active</span>
+                </div>
+                <p class="section-desc" style="margin-bottom:10px;">Sanity tests checking tournament schedulers, crowd queues, and inputs boundary validation.</p>
+                <div id="diagnostics-test-list" class="checklist-item" style="display:flex;flex-direction:column;gap:8px;background:white;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:12px;" aria-live="polite">
+                  <!-- Loaded dynamically in app.js -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: Report Preview -->
+            <div class="reports-preview glass-card">
+              <div class="preview-header">
+                <h3>Executive Report Preview</h3>
+                <div class="preview-actions">
+                  <button class="btn btn-outline btn-sm" id="btn-copy-report-text" aria-label="Copy generated text report to clipboard">
+                    <i data-lucide="copy" aria-hidden="true"></i> Copy Text
+                  </button>
+                  <button class="btn btn-primary btn-sm" id="btn-download-report-txt" aria-label="Download compiled report text file to disk">
+                    <i data-lucide="download" aria-hidden="true"></i> Download Report
+                  </button>
+                </div>
+              </div>
+              <div class="report-document-container" id="report-document-body" aria-live="polite">
+                <!-- Generated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <!-- Application JS Modules -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
