@@ -177,16 +177,30 @@ function renderConflictsCard() {
   lucide.createIcons();
 }
 
+function sanitizeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[&<>"']/g, function(match) {
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;'
+    };
+    return escapeMap[match];
+  });
+}
+
 function handleAddMatch(e) {
   e.preventDefault();
 
-  const teamA = document.getElementById('match-team-a').value;
-  const teamB = document.getElementById('match-team-b').value;
-  const date = document.getElementById('match-date').value;
-  const time = document.getElementById('match-time').value;
-  const venue = document.getElementById('match-venue').value;
-  const referee = document.getElementById('match-referee').value;
-  const status = document.getElementById('match-status').value;
+  const teamA = sanitizeHtml(document.getElementById('match-team-a').value);
+  const teamB = sanitizeHtml(document.getElementById('match-team-b').value);
+  const date = sanitizeHtml(document.getElementById('match-date').value);
+  const time = sanitizeHtml(document.getElementById('match-time').value);
+  const venue = sanitizeHtml(document.getElementById('match-venue').value);
+  const referee = sanitizeHtml(document.getElementById('match-referee').value);
+  const status = sanitizeHtml(document.getElementById('match-status').value);
 
   if (teamA === teamB) {
     alert("Operational Error: A team cannot play against itself.");

@@ -194,13 +194,27 @@ function renderIncidentTimeline() {
   lucide.createIcons();
 }
 
+function sanitizeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[&<>"']/g, function(match) {
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;'
+    };
+    return escapeMap[match];
+  });
+}
+
 function handleLogIncident(e) {
   e.preventDefault();
 
-  const type = document.getElementById('inc-type').value;
-  const location = document.getElementById('inc-location').value;
-  const severity = document.getElementById('inc-severity').value;
-  const description = document.getElementById('inc-details').value;
+  const type = sanitizeHtml(document.getElementById('inc-type').value);
+  const location = sanitizeHtml(document.getElementById('inc-location').value);
+  const severity = sanitizeHtml(document.getElementById('inc-severity').value);
+  const description = sanitizeHtml(document.getElementById('inc-details').value);
 
   const now = new Date();
   const timeStr = now.toTimeString().substring(0, 5);
