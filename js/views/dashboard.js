@@ -211,11 +211,10 @@ function renderAiSuggestions(state) {
       text: 'Main grid power feed disconnected. AI recommends engaging auxiliary solar battery arrays to sustain full stadium lighting.',
       actionType: 'mitigate-power',
       why: 'Main power transformer lost grid connection during heavy spectator draw.',
+      risk: 'Prevents complete stadium-wide blackout and turnstile shutdown.',
       impact: 'Stabilizes electrical load across pitch lighting and turnstile security checkpoints.',
-      agents: 'Energy Agent, Security Commander, Incident Coordinator',
-      benefit: 'Maintains 100% broadcast power continuity and gate scanner uptime.',
-      risk: 'Reduces power outage safety risks and crowd panic in dark concourse spaces by 99%.',
-      outcome: 'Grid stays online with zero downtime or match postponement.'
+      confidence: '98%',
+      improvement: 'Engages backup solar storage battery arrays in under 5 seconds, maintaining 100% security system uptime.'
     });
   }
 
@@ -226,11 +225,10 @@ function renderAiSuggestions(state) {
       text: 'Heavy rain causing high parking transit bottlenecks. AI recommends increasing Light Rail capacity and deploying post-match shuttles.',
       actionType: 'mitigate-rain',
       why: 'High precipitation rate reduces road transit speeds by 40% and increases parking plaza delays.',
+      risk: 'Reduces highway fender-benders and pedestrian queuing congestion in rainy plazas.',
       impact: 'Balances transportation loads and diverts spectators from road choke points to high-capacity rail lines.',
-      agents: 'Transit Director, Logistics Planner, Fan Experience Agent',
-      benefit: 'Evacuates post-match concourses faster, boosting fan comfort metrics.',
-      risk: 'Minimizes highway fender-benders and pedestrian queuing congestion in rainy plazas.',
-      outcome: 'Reduces overall stadium egress bottleneck duration by 22 minutes.'
+      confidence: '95%',
+      improvement: 'Increases Light Rail capacity and deploys post-match shuttles, reducing egress bottlenecks by 22 minutes.'
     });
   }
 
@@ -241,11 +239,10 @@ function renderAiSuggestions(state) {
       text: `${congestedGates.map(g=>g.name).join(', ')} turnstile wait time excessive. AI recommends immediate Turnstile Redistribution routing.`,
       actionType: 'mitigate-gates',
       why: 'Arrival rate exceeds maximum throughput capacity at Gate E turnstile plazas.',
-      impact: 'Redistributes pending queue load to adjacent underutilized entry points (Gates C & D).',
-      agents: 'Crowd Intelligence Agent, Safety Commander, Transit Director',
-      benefit: 'Balances pedestrian distribution and optimizes gate throughput.',
       risk: 'Mitigates stampede risks, queue bottlenecks, and concourse overcrowding.',
-      outcome: 'Drops turnstile wait times from 45 min to under 5 min.'
+      impact: 'Redistributes pending queue load to adjacent underutilized entry points (Gates C & D).',
+      confidence: '94%',
+      improvement: 'Redistributes mobile security stewards to balance turnstile flow, dropping wait times from 45 min to under 5 min.'
     });
   }
 
@@ -256,11 +253,10 @@ function renderAiSuggestions(state) {
       text: `AI detected ${conflicts.length} tournament scheduling clashes. Click to run AI Schedule Optimization rules.`,
       actionType: 'optimize-schedule',
       why: 'Referees, venues, or player rest times have overlapping match bookings in the fixture calendar.',
-      impact: 'Reallocates referees and shifts kick-off slots to guarantee FIFA-compliant rest offsets.',
-      agents: 'Tournament Scheduler, Operations Lead, Director AI',
-      benefit: 'Clears all match booking overlaps automatically in the database.',
       risk: 'Eliminates human booking errors and referee scheduling collision risks.',
-      outcome: 'All teams get a minimum 48 hours of recovery time with clean venue rosters.'
+      impact: 'Reallocates referees and shifts kick-off slots to guarantee FIFA-compliant rest offsets.',
+      confidence: '96%',
+      improvement: 'Resolves all overbookings dynamically, guaranteeing a minimum 48 hours of recovery time.'
     });
   }
 
@@ -273,11 +269,10 @@ function renderAiSuggestions(state) {
         text: 'Peak solar generation (340 kWh) exceeds stadium draw. Diverting surplus feed to regional utility offset grid.',
         actionType: 'none',
         why: 'Solar irradiation peaked during low-draw pre-game hours, filling battery banks.',
-        impact: 'Offsets municipal carbon credits by injecting renewable energy back into the city power grid.',
-        agents: 'Sustainability Officer, Energy Agent, Director AI',
-        benefit: 'Accrues energy offset credits and reduces fossil fuel intake.',
         risk: 'Reduces reliance on city coal power plants during peak hour grid loads.',
-        outcome: 'Saves stadium energy costs and offsets gross footprint by 1.2 tCO2e.'
+        impact: 'Offsets municipal carbon credits by injecting renewable energy back into the city power grid.',
+        confidence: '95%',
+        improvement: 'Diverts surplus feed to regional utility offset grid, offsetting carbon footprint by 1.2 tCO2e.'
       },
       {
         type: 'info',
@@ -285,11 +280,10 @@ function renderAiSuggestions(state) {
         text: 'Elevator 2 West offline. AI recommends posting wheelchair stewards at Entrance West and activating visual audio guides.',
         actionType: 'none',
         why: 'Mechanical alert triggered elevator service lockout.',
-        impact: 'Provides assisted transit detours for mobility-impaired spectators.',
-        agents: 'Accessibility Steward, Operations Lead, Fan Experience Agent',
-        benefit: 'Maintains continuous ADA/FIFA tournament accessibility guidelines compliance.',
         risk: 'Avoids wheelchair traffic blockages in main stairwell lobbies.',
-        outcome: 'All spectators reach their seats comfortably within standard arrival durations.'
+        impact: 'Provides assisted transit detour pathways for mobility-impaired spectators.',
+        confidence: '97%',
+        improvement: 'Stations wheelchair stewards at West Entrance and activates audio description guides, ensuring ADA compliance.'
       }
     );
   }
@@ -303,12 +297,11 @@ function renderAiSuggestions(state) {
       <div class="ticker-text" style="font-size:0.75rem;line-height:1.4;margin:4px 0;">${s.text}</div>
       
       <div class="ticker-justification" style="background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;font-size:0.7rem;display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--accent);">
-        <div><strong>Rationale (Why):</strong> ${s.why}</div>
-        <div><strong>Expected Impact:</strong> ${s.impact}</div>
-        <div><strong>Affected AI Agents:</strong> ${s.agents}</div>
-        <div><strong>Operational Benefit:</strong> ${s.benefit}</div>
+        <div><strong>Why:</strong> ${s.why}</div>
         <div><strong>Risk Reduction:</strong> ${s.risk}</div>
-        <div><strong>Expected Outcome:</strong> ${s.outcome}</div>
+        <div><strong>Operational Impact:</strong> ${s.impact}</div>
+        <div><strong>AI Confidence:</strong> ${s.confidence}</div>
+        <div><strong>Expected Operational Improvement:</strong> ${s.improvement}</div>
       </div>
 
       <div class="ticker-actions" style="margin-top:4px;">
