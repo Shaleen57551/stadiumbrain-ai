@@ -1,5 +1,6 @@
 // AI Operations Center View Module (Multi-Agent Platform) - StadiumBrain AI
 import { aiModesResponses } from '../data.js';
+import { sanitizeHtml } from '../app.js';
 
 let appState = null;
 
@@ -250,7 +251,7 @@ function renderChatMessages() {
       return `
         <div class="chat-message user">
           <div class="msg-avatar">OPS</div>
-          <div class="msg-bubble">${escapeHtml(msg.text)}</div>
+          <div class="msg-bubble">${sanitizeHtml(msg.text)}</div>
         </div>
       `;
     } else {
@@ -454,11 +455,4 @@ function formatMarkdownList(txt) {
     .replace(/\* (.*?)/g, '• $1');
 }
 
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+

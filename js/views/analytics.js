@@ -34,107 +34,123 @@ export function render(state) {
 }
 
 function initCharts() {
-  const chartConfigs = getChartDataConfigs('7days');
-
-  // Destroy existing charts to avoid overlap glitches
-  Object.keys(chartInstances).forEach(key => {
-    if (chartInstances[key]) {
-      chartInstances[key].destroy();
+  try {
+    if (typeof Chart === 'undefined') {
+      console.warn("Chart.js library is not loaded yet. Delaying initialization.");
+      return;
     }
-  });
+    const chartConfigs = getChartDataConfigs('7days');
 
-  // 1. Attendance Trend Line Chart
-  const ctxAttendance = document.getElementById('attendance-trend-chart');
-  if (ctxAttendance) {
-    chartInstances.attendance = new Chart(ctxAttendance, {
-      type: 'line',
-      data: chartConfigs.attendance.data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: { grid: { color: 'rgba(0,0,0,0.05)' } },
-          x: { grid: { display: false } }
+    // Destroy existing charts to avoid overlap glitches
+    Object.keys(chartInstances).forEach(key => {
+      try {
+        if (chartInstances[key]) {
+          chartInstances[key].destroy();
         }
+      } catch (e) {
+        console.error("Error destroying chart instance:", e);
       }
     });
-  }
 
-  // 2. Revenue Doughnut Chart
-  const ctxRevenue = document.getElementById('revenue-split-chart');
-  if (ctxRevenue) {
-    chartInstances.revenue = new Chart(ctxRevenue, {
-      type: 'doughnut',
-      data: chartConfigs.revenue.data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'right' }
+    // 1. Attendance Trend Line Chart
+    const ctxAttendance = document.getElementById('attendance-trend-chart');
+    if (ctxAttendance) {
+      chartInstances.attendance = new Chart(ctxAttendance, {
+        type: 'line',
+        data: chartConfigs.attendance.data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          }
         }
-      }
-    });
-  }
+      });
+    }
 
-  // 3. Hourly Turnstiles Peak Bar Chart
-  const ctxTurnstiles = document.getElementById('gate-turnstile-chart');
-  if (ctxTurnstiles) {
-    chartInstances.turnstiles = new Chart(ctxTurnstiles, {
-      type: 'bar',
-      data: chartConfigs.turnstiles.data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: { grid: { color: 'rgba(0,0,0,0.05)' } },
-          x: { grid: { display: false } }
+    // 2. Revenue Doughnut Chart
+    const ctxRevenue = document.getElementById('revenue-split-chart');
+    if (ctxRevenue) {
+      chartInstances.revenue = new Chart(ctxRevenue, {
+        type: 'doughnut',
+        data: chartConfigs.revenue.data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right' }
+          }
         }
-      }
-    });
-  }
+      });
+    }
 
-  // 4. Transit Capacity Line/Radar Chart
-  const ctxTransit = document.getElementById('transit-load-chart');
-  if (ctxTransit) {
-    chartInstances.transit = new Chart(ctxTransit, {
-      type: 'line',
-      data: chartConfigs.transit.data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { grid: { color: 'rgba(0,0,0,0.05)' } },
-          x: { grid: { display: false } }
+    // 3. Hourly Turnstiles Peak Bar Chart
+    const ctxTurnstiles = document.getElementById('gate-turnstile-chart');
+    if (ctxTurnstiles) {
+      chartInstances.turnstiles = new Chart(ctxTurnstiles, {
+        type: 'bar',
+        data: chartConfigs.turnstiles.data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          }
         }
-      }
-    });
+      });
+    }
+
+    // 4. Transit Capacity Line/Radar Chart
+    const ctxTransit = document.getElementById('transit-load-chart');
+    if (ctxTransit) {
+      chartInstances.transit = new Chart(ctxTransit, {
+        type: 'line',
+        data: chartConfigs.transit.data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Critical error in initCharts:", error);
   }
 }
 
 function updateAnalyticsData(filter) {
-  const configs = getChartDataConfigs(filter);
+  try {
+    const configs = getChartDataConfigs(filter);
 
-  if (chartInstances.attendance) {
-    chartInstances.attendance.data = configs.attendance.data;
-    chartInstances.attendance.update();
-  }
-  if (chartInstances.revenue) {
-    chartInstances.revenue.data = configs.revenue.data;
-    chartInstances.revenue.update();
-  }
-  if (chartInstances.turnstiles) {
-    chartInstances.turnstiles.data = configs.turnstiles.data;
-    chartInstances.turnstiles.update();
-  }
-  if (chartInstances.transit) {
-    chartInstances.transit.data = configs.transit.data;
-    chartInstances.transit.update();
+    if (chartInstances.attendance) {
+      chartInstances.attendance.data = configs.attendance.data;
+      chartInstances.attendance.update();
+    }
+    if (chartInstances.revenue) {
+      chartInstances.revenue.data = configs.revenue.data;
+      chartInstances.revenue.update();
+    }
+    if (chartInstances.turnstiles) {
+      chartInstances.turnstiles.data = configs.turnstiles.data;
+      chartInstances.turnstiles.update();
+    }
+    if (chartInstances.transit) {
+      chartInstances.transit.data = configs.transit.data;
+      chartInstances.transit.update();
+    }
+  } catch (error) {
+    console.error("Critical error in updateAnalyticsData:", error);
   }
 }
 

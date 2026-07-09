@@ -277,8 +277,13 @@ export function recalculateScores() {
   let sustain = 85;
   let fan = 89;
 
+  // Defensive safety defaults
+  const sc = state?.simulation?.activeScenarios || [];
+  const gates = state?.crowd?.gates || [];
+  const activeIncidentsList = state?.emergency?.activeIncidents || [];
+  const conflicts = state?.simulation?.schedulingConflicts || [];
+
   // 1. Simulator adjustments
-  const sc = state.simulation.activeScenarios;
   if (sc.includes('rain')) {
     sustain -= 15;
     fan -= 12;
@@ -307,26 +312,28 @@ export function recalculateScores() {
   }
 
   // 2. Dynamic gate queues and incidents
-  const activeIncidents = state.emergency.activeIncidents.length;
+  const activeIncidents = activeIncidentsList.length;
   safety -= activeIncidents * 6;
 
-  const congestedGates = state.crowd.gates.filter(g => g.status === 'Congested').length;
+  const congestedGates = gates.filter(g => g?.status === 'Congested').length;
   fan -= congestedGates * 8;
   ops -= congestedGates * 5;
 
   // 3. Scheduling conflict weight
-  const conflictCount = state.simulation.schedulingConflicts.length;
+  const conflictCount = conflicts.length;
   ops -= conflictCount * 10;
 
-  // Limits
-  state.simulation.scores.operational = Math.max(5, Math.min(100, ops));
-  state.simulation.scores.safety = Math.max(5, Math.min(100, safety));
-  state.simulation.scores.sustainability = Math.max(5, Math.min(100, sustain));
-  state.simulation.scores.fanExperience = Math.max(5, Math.min(100, fan));
+  // Limits and fallback checks
+  if (state?.simulation?.scores) {
+    state.simulation.scores.operational = Math.max(5, Math.min(100, isNaN(ops) ? 90 : ops));
+    state.simulation.scores.safety = Math.max(5, Math.min(100, isNaN(safety) ? 90 : safety));
+    state.simulation.scores.sustainability = Math.max(5, Math.min(100, isNaN(sustain) ? 90 : sustain));
+    state.simulation.scores.fanExperience = Math.max(5, Math.min(100, isNaN(fan) ? 90 : fan));
 
-  // Calculate average overall health
-  const avg = (state.simulation.scores.operational + state.simulation.scores.safety + state.simulation.scores.sustainability + state.simulation.scores.fanExperience) / 4;
-  state.simulation.scores.overall = Math.round(avg);
+    // Calculate average overall health
+    const avg = (state.simulation.scores.operational + state.simulation.scores.safety + state.simulation.scores.sustainability + state.simulation.scores.fanExperience) / 4;
+    state.simulation.scores.overall = Math.round(avg);
+  }
 
   renderScoreDials();
 }

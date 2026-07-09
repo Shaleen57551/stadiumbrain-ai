@@ -209,7 +209,11 @@ function renderAiSuggestions(state) {
       type: 'danger',
       category: 'Power Grid Failure',
       text: 'Main grid power feed disconnected. AI recommends engaging auxiliary solar battery arrays to sustain full stadium lighting.',
-      actionType: 'mitigate-power'
+      actionType: 'mitigate-power',
+      why: 'Main power transformer lost grid connection during heavy spectator draw.',
+      impact: 'Stabilizes electrical load across pitch lighting and turnstile security checkpoints.',
+      agents: 'Energy Agent, Security Commander',
+      benefits: 'Zero disruption to active match broadcast; maintains 100% security system uptime.'
     });
   }
 
@@ -218,7 +222,11 @@ function renderAiSuggestions(state) {
       type: 'warning',
       category: 'Weather Impact',
       text: 'Heavy rain causing high parking transit bottlenecks. AI recommends increasing Light Rail capacity and deploying post-match shuttles.',
-      actionType: 'mitigate-rain'
+      actionType: 'mitigate-rain',
+      why: 'High precipitation rate reduces road transit speeds by 40% and increases parking plaza delays.',
+      impact: 'Balances transportation loads and diverts spectators from road choke points to high-capacity rail lines.',
+      agents: 'Transit Director, Logistics Planner',
+      benefits: 'Reduces post-match stadium egress bottlenecks by approximately 22 minutes.'
     });
   }
 
@@ -227,7 +235,11 @@ function renderAiSuggestions(state) {
       type: 'danger',
       category: 'Crowd Congestion',
       text: `${congestedGates.map(g=>g.name).join(', ')} turnstile wait time excessive. AI recommends immediate Turnstile Redistribution routing.`,
-      actionType: 'mitigate-gates'
+      actionType: 'mitigate-gates',
+      why: 'Arrival rate exceeds maximum throughput capacity at gate plazas.',
+      impact: 'Redistributes pending queue load to adjacent underutilized entry points (Gates C & D).',
+      agents: 'Crowd Intelligence Agent, Safety Commander',
+      benefits: 'Drops peak turnstile wait times from 45 min to under 5 min, maximizing spectator comfort.'
     });
   }
 
@@ -236,7 +248,11 @@ function renderAiSuggestions(state) {
       type: 'warning',
       category: 'Scheduling Conflict',
       text: `AI detected ${conflicts.length} tournament scheduling clashes. Click to run AI Schedule Optimization rules.`,
-      actionType: 'optimize-schedule'
+      actionType: 'optimize-schedule',
+      why: 'Referees, venues, or player rest times have overlapping match bookings in the fixture calendar.',
+      impact: 'Reallocates referees and shifts kick-off slots to guarantee FIFA-compliant rest offsets.',
+      agents: 'Tournament Scheduler, Ops Coordinator',
+      benefits: 'Resolves all fixture overbookings without manual rescheduling errors.'
     });
   }
 
@@ -247,31 +263,47 @@ function renderAiSuggestions(state) {
         type: 'info',
         category: 'Sustainability',
         text: 'Peak solar generation (340 kWh) exceeds stadium draw. Diverting surplus feed to regional utility offset grid.',
-        actionType: 'none'
+        actionType: 'none',
+        why: 'Solar irradiation peaked during low-draw pre-game hours, filling battery banks.',
+        impact: 'Offsets municipal carbon credits by injecting renewable energy back into the city power grid.',
+        agents: 'Sustainability Officer, Energy Agent',
+        benefits: 'Accrues offset credits and reduces gross carbon footprint equivalent by 1.2 tCO2e.'
       },
       {
         type: 'info',
         category: 'Accessibility',
         text: 'Elevator 2 West offline. AI recommends posting wheelchair stewards at Entrance West and activating visual audio guides.',
-        actionType: 'none'
+        actionType: 'none',
+        why: 'Mechanical alert triggered elevator service lockout.',
+        impact: 'Provides assisted transit detours for mobility-impaired spectators.',
+        agents: 'Accessibility Steward, Operations Lead',
+        benefits: 'Ensures continuous compliance with ADA/FIFA tournament accessibility guidelines.'
       }
     );
   }
 
   ticker.innerHTML = suggestions.map((s, idx) => `
-    <div class="ai-ticker-item ${s.type}">
+    <div class="ai-ticker-item ${s.type}" style="padding:14px;display:flex;flex-direction:column;gap:8px;">
       <div class="ticker-meta">
-        <span class="text-accent">${s.category}</span>
-        <span class="ticker-time">AI Recommended</span>
+        <span class="text-accent" style="font-weight:700;font-size:0.8rem;">${s.category}</span>
+        <span class="ticker-time" style="font-size:0.65rem;color:var(--text-muted);">AI Recommended</span>
       </div>
-      <div class="ticker-text">${s.text}</div>
-      <div class="ticker-actions">
+      <div class="ticker-text" style="font-size:0.75rem;line-height:1.4;margin:4px 0;">${s.text}</div>
+      
+      <div class="ticker-justification" style="background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;font-size:0.7rem;display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--accent);">
+        <div><strong>Rationale (Why):</strong> ${s.why}</div>
+        <div><strong>Expected Impact:</strong> ${s.impact}</div>
+        <div><strong>Affected Agents:</strong> ${s.agents}</div>
+        <div><strong>Estimated Benefits:</strong> ${s.benefits}</div>
+      </div>
+
+      <div class="ticker-actions" style="margin-top:4px;">
         ${s.actionType !== 'none' ? `
-          <button class="btn btn-primary btn-sm apply-mitigation-btn" data-action="${s.actionType}">
+          <button class="btn btn-primary btn-sm apply-mitigation-btn" data-action="${s.actionType}" style="padding:4px 8px;font-size:0.7rem;">
             <i data-lucide="sparkles" style="width:12px;height:12px;"></i> Apply Decision
           </button>
         ` : `
-          <button class="ticker-apply-btn view-suggest-btn" data-view-target="sustainability">
+          <button class="ticker-apply-btn view-suggest-btn" data-view-target="sustainability" style="padding:4px 8px;font-size:0.7rem;">
             Details <i data-lucide="arrow-right" style="width:12px;height:12px;"></i>
           </button>
         `}
