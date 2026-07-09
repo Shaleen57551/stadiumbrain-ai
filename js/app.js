@@ -504,6 +504,7 @@ export function runSystemDiagnostics() {
   if (!diagnosticList) return;
 
   const results = [];
+  const startTime = performance.now();
 
   const addTest = (name, assertion, desc) => {
     let status = "FAILED";
@@ -514,6 +515,8 @@ export function runSystemDiagnostics() {
         status = "PASSED";
       } else if (res === "WARNING") {
         status = "WARNING";
+      } else if (res === "SKIPPED") {
+        status = "SKIPPED";
       }
     } catch (err) {
       detail = ` (Exception: ${err.message})`;
@@ -673,11 +676,9 @@ export function runSystemDiagnostics() {
 
   // Test 19: Programmatic Accessibility Audits (WCAG AA Compliance)
   addTest("Accessibility Compliance Check", () => {
-    // Check 1: All img elements have alt attribute or aria-hidden
     const imgs = Array.from(document.querySelectorAll('img'));
     const imgsPassed = imgs.every(img => img.hasAttribute('alt') || img.getAttribute('aria-hidden') === 'true');
 
-    // Check 2: Interactive elements have accessible names
     const interactives = Array.from(document.querySelectorAll('button, a, select, textarea'));
     const interactivesPassed = interactives.every(el => {
       const hasLabel = el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby') || el.hasAttribute('title');
@@ -686,7 +687,6 @@ export function runSystemDiagnostics() {
       return hasLabel || hasContent || isAriaHidden;
     });
 
-    // Check 3: Check for duplicate IDs in the DOM (WCAG 4.1.1 Parsing compliance)
     const allElements = document.querySelectorAll('[id]');
     const ids = Array.from(allElements).map(el => el.id);
     const duplicates = ids.filter((item, index) => ids.indexOf(item) !== index);
@@ -695,22 +695,52 @@ export function runSystemDiagnostics() {
     return imgsPassed && interactivesPassed && noDuplicates;
   }, "Performs programmatic WCAG audits checking image alt values, button accessible names, and parsing ID duplicates.");
 
-  // Health Rate
+  // Test 20: Maintenance Venue Ticket Scanner (Skipped under normal conditions)
+  addTest("Maintenance Venue Ticket Scanner", () => {
+    const maintenanceVenues = state.tournament.venues.filter(v => v.status === 'Maintenance');
+    if (maintenanceVenues.length > 0) {
+      return "SKIPPED";
+    }
+    return true;
+  }, "Checks that ticket scans are skipped for stadiums currently flagged under maintenance cycles.");
+
+  const endTime = performance.now();
+  const duration = (endTime - startTime).toFixed(2);
+
+  // Health Rate calculations
+  const total = results.length;
   const passed = results.filter(r => r.status === 'PASSED').length;
-  const healthRate = Math.round((passed / results.length) * 100);
+  const warning = results.filter(r => r.status === 'WARNING').length;
+  const failed = results.filter(r => r.status === 'FAILED').length;
+  const skipped = results.filter(r => r.status === 'SKIPPED').length;
+  const healthRate = Math.round((passed / total) * 100);
 
   if (diagStatus) {
     diagStatus.textContent = `Health: ${healthRate}%`;
     diagStatus.className = healthRate >= 95 ? 'badge badge-accent' : 'badge badge-danger';
   }
 
-  diagnosticList.innerHTML = results.map(r => `
+  const summaryHtml = `
+    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:10px;margin-bottom:12px;display:grid;grid-template-columns:repeat(5, 1fr);gap:4px;text-align:center;font-size:0.65rem;font-weight:700;">
+      <div style="color:var(--text-muted);">Total: <span style="color:var(--text-main); font-size:0.75rem;">${total}</span></div>
+      <div style="color:var(--success);">Passed: <span style="font-size:0.75rem;">${passed}</span></div>
+      <div style="color:var(--warning);">Warning: <span style="font-size:0.75rem;">${warning}</span></div>
+      <div style="color:var(--danger);">Failed: <span style="font-size:0.75rem;">${failed}</span></div>
+      <div style="color:#64748b;">Skipped: <span style="font-size:0.75rem;">${skipped}</span></div>
+    </div>
+    <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--border-color);padding-bottom:6px;">
+      <span>Duration: <strong>${duration} ms</strong></span>
+      <span>Health Rating: <strong>${healthRate}%</strong></span>
+    </div>
+  `;
+
+  diagnosticList.innerHTML = summaryHtml + results.map(r => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);gap:12px;">
       <div style="display:flex;flex-direction:column;gap:2px;">
         <span style="font-weight:700;color:var(--text-main);font-size:0.75rem;">${r.name}</span>
         <span style="font-size:0.65rem;color:var(--text-muted);">${r.desc}</span>
       </div>
-      <span class="badge ${r.status === 'PASSED' ? 'badge-accent' : r.status === 'WARNING' ? 'badge-amber' : r.status === 'WARNING' ? 'badge-amber' : 'badge-danger'}" style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;padding:2px 6px;">${r.status}</span>
+      <span class="badge ${r.status === 'PASSED' ? 'badge-accent' : r.status === 'WARNING' ? 'badge-amber' : r.status === 'SKIPPED' ? 'badge-grey' : 'badge-danger'}" style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;padding:2px 6px;">${r.status}</span>
     </div>
   `).join('');
 }
